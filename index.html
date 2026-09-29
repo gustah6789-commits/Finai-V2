@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080c16"><meta name="description" content="FinAI V2 — controle financeiro pessoal.">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png">
+<title>FinAI V2 — Controle Financeiro</title>
+<style>
+:root{--bg:#080c16;--panel:#101827;--panel2:#151f31;--text:#f5f7fb;--muted:#9aa7ba;--line:#273349;--a:#6d7cff;--g:#31d48a;--r:#ff6577;--y:#ffd166}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#080c16,#0b1120);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}.app{max-width:1100px;margin:auto;min-height:100vh;padding-bottom:88px}
+header{position:sticky;top:0;z-index:9;background:rgba(8,12,22,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;justify-content:space-between;align-items:center}.brand{font-size:21px;font-weight:900}.brand span{color:var(--a)}.month{background:#111a2a;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:8px}
+main{padding:17px}.view{display:none}.view.active{display:block}.title{font-size:27px;font-weight:850;margin:3px 0}.sub{color:var(--muted);font-size:14px;margin:4px 0 17px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}.card{background:linear-gradient(145deg,var(--panel),#0e1523);border:1px solid var(--line);border-radius:16px;padding:15px}.label{font-size:12px;color:var(--muted)}.value{font-size:23px;font-weight:850;margin-top:6px}.green{color:var(--g)}.red{color:var(--r)}.yellow{color:var(--y)}
+.section{margin-top:18px}.section h2{font-size:17px;margin:0 0 10px}.list{display:grid;gap:9px}.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px}.row small{color:var(--muted)}.amount{font-weight:800;white-space:nowrap}
+.btn{border:0;border-radius:10px;padding:11px 13px;background:var(--a);color:#fff;font-weight:800}.btn.secondary{background:#1a2538}.btn.danger{background:#32161d;color:#ff9eaa;padding:7px 9px}.actions{display:flex;gap:8px;flex-wrap:wrap}
+.form{display:grid;gap:11px}.two{display:grid;grid-template-columns:1fr 1fr;gap:11px}.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}.field input,.field select{width:100%;background:#0b1220;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:11px;outline:none}
+.progress{height:8px;background:#202b3f;border-radius:20px;overflow:hidden}.fill{height:100%;background:var(--a);border-radius:20px}.statline{display:flex;justify-content:space-between;font-size:13px;margin:7px 0}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:10;background:rgba(8,12,22,.96);backdrop-filter:blur(15px);border-top:1px solid var(--line)}.navin{max-width:800px;margin:auto;display:grid;grid-template-columns:repeat(6,1fr)}nav button{border:0;background:none;color:var(--muted);padding:9px 3px 10px;font-size:11px}nav button.active{color:#fff}nav .ico{display:block;font-size:18px;margin-bottom:2px}
+.chat{height:57vh;min-height:390px;display:flex;flex-direction:column}.messages{flex:1;overflow:auto;display:grid;align-content:start;gap:8px}.msg{max-width:90%;padding:10px 12px;border-radius:13px;line-height:1.42;font-size:14px}.bot{background:#182338;border:1px solid var(--line)}.me{margin-left:auto;background:var(--a)}.chatbar{display:flex;gap:7px;margin-top:8px}.chatbar input{flex:1;background:#0b1220;border:1px solid var(--line);border-radius:10px;padding:11px;color:#fff}.chatbar button{border:0;background:var(--a);color:#fff;border-radius:10px;padding:0 15px;font-weight:800}
+.goal{display:grid;gap:7px}.goalhead{display:flex;justify-content:space-between}.tag{font-size:11px;border:1px solid var(--line);padding:3px 7px;border-radius:20px;color:var(--muted)}
+@media(max-width:760px){main{padding:14px}.grid{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}.navin{grid-template-columns:repeat(3,1fr)}.navin button:nth-child(n+4){display:block}}
+@media(min-width:800px){nav{position:sticky;top:62px;bottom:auto;border-top:0;border-bottom:1px solid var(--line)}.app{padding-bottom:15px}}
+.empty{color:var(--muted);text-align:center;padding:23px}
+</style>
+</head>
+<body><div class="app">
+<header><div class="brand">Fin<span>AI</span> <small style="font-size:10px;color:var(--muted)">V2</small></div><input id="month" class="month" type="month"></header>
+<main>
+<section id="home" class="view active">
+<div class="title">Visão geral</div><div class="sub">Seu dinheiro, organizado por mês.</div>
+<div class="grid">
+<div class="card"><div class="label">Saldo do mês</div><div id="balance" class="value">R$ 0,00</div></div>
+<div class="card"><div class="label">Receitas</div><div id="income" class="value green">R$ 0,00</div></div>
+<div class="card"><div class="label">Despesas</div><div id="expense" class="value red">R$ 0,00</div></div>
+<div class="card"><div class="label">Economia</div><div id="saveRate" class="value yellow">0%</div></div>
+</div>
+<div class="section grid" style="grid-template-columns:1fr 1fr">
+<div class="card"><div class="label">Limite de orçamento</div><div id="budgetHome" class="value">R$ 0,00</div><div class="progress"><div id="budgetFill" class="fill" style="width:0%"></div></div></div>
+<div class="card"><div class="label">Cartão usado</div><div id="cardHome" class="value">R$ 0,00</div><div id="cardHint" class="label" style="margin-top:5px">Nenhum cartão cadastrado</div></div>
+</div>
+<div class="section"><h2>Últimos lançamentos</h2><div id="recent" class="list"></div></div>
+<div class="section card"><div class="label">FINAI · ANÁLISE</div><p id="analysis" style="line-height:1.5;margin-bottom:0"></p></div>
+</section>
+
+<section id="transactions" class="view">
+<div class="title">Lançamentos</div><div class="sub">Tudo que entra e sai.</div>
+<div class="card form"><div class="two">
+<div class="field"><label>Tipo</label><select id="type"><option value="expense">Despesa</option><option value="income">Receita</option></select></div>
+<div class="field"><label>Valor</label><input id="amount" type="number" min="0" step=".01" placeholder="0,00"></div></div>
+<div class="two"><div class="field"><label>Categoria</label><select id="category"><option>Alimentação</option><option>Transporte</option><option>Moradia</option><option>Contas</option><option>Lazer</option><option>Saúde</option><option>Compras</option><option>Salário</option><option>Outros</option></select></div>
+<div class="field"><label>Data</label><input id="date" type="date"></div></div>
+<div class="field"><label>Descrição</label><input id="desc" placeholder="Ex.: mercado"></div>
+<div class="field"><label>Forma</label><select id="method"><option>Dinheiro</option><option>Pix</option><option>Débito</option><option>Crédito</option><option>Transferência</option></select></div>
+<button class="btn" id="addTx">Adicionar lançamento</button></div>
+<div class="section"><h2>Histórico</h2><div id="history" class="list"></div></div>
+</section>
+
+<section id="cards" class="view"><div class="title">Cartões</div><div class="sub">Controle limite e gastos no crédito.</div>
+<div class="card form"><div class="two"><div class="field"><label>Nome</label><input id="cardName" placeholder="Ex.: Nubank"></div><div class="field"><label>Limite</label><input id="cardLimit" type="number" step=".01" placeholder="5000"></div></div><button class="btn" id="addCard">Adicionar cartão</button></div>
+<div class="section"><div id="cardsList" class="list"></div></div></section>
+
+<section id="recurring" class="view"><div class="title">Recorrentes</div><div class="sub">Contas que se repetem todo mês.</div>
+<div class="card form"><div class="two"><div class="field"><label>Nome</label><input id="recName" placeholder="Aluguel"></div><div class="field"><label>Valor</label><input id="recValue" type="number" step=".01" placeholder="1200"></div></div>
+<div class="two"><div class="field"><label>Categoria</label><select id="recCat"><option>Moradia</option><option>Contas</option><option>Alimentação</option><option>Transporte</option><option>Outros</option></select></div><div class="field"><label>Dia</label><input id="recDay" type="number" min="1" max="31" value="10"></div></div>
+<button class="btn" id="addRec">Adicionar conta recorrente</button></div>
+<div class="section"><div id="recList" class="list"></div></div></section>
+
+<section id="goals" class="view"><div class="title">Metas</div><div class="sub">Transforme objetivos em números.</div>
+<div class="card form"><div class="two"><div class="field"><label>Meta</label><input id="goalName" placeholder="Reserva de emergência"></div><div class="field"><label>Valor alvo</label><input id="goalTarget" type="number" step=".01" placeholder="10000"></div></div>
+<div class="field"><label>Valor já guardado</label><input id="goalSaved" type="number" step=".01" placeholder="0"></div><button class="btn" id="addGoal">Criar meta</button></div>
+<div class="section"><div id="goalList" class="list"></div></div></section>
+
+<section id="assistant" class="view"><div class="title">Assistente IA</div><div class="sub">Pergunte sobre os seus dados.</div>
+<div class="card chat"><div id="messages" class="messages"></div><div class="chatbar"><input id="q" placeholder="Ex.: qual minha maior despesa?"><button id="send">Enviar</button></div></div></section>
+</main>
+<nav><div class="navin">
+<button class="active" data-view="home"><span class="ico">⌂</span>Início</button>
+<button data-view="transactions"><span class="ico">＋</span>Lançamentos</button>
+<button data-view="cards"><span class="ico">▣</span>Cartões</button>
+<button data-view="recurring"><span class="ico">↻</span>Recorrentes</button>
+<button data-view="goals"><span class="ico">◎</span>Metas</button>
+<button data-view="assistant"><span class="ico">✦</span>IA</button>
+</div></nav></div>
+<script>
+const KEY="finai_v2_data";let d=JSON.parse(localStorage.getItem(KEY)||'{"transactions":[],"cards":[],"recurring":[],"goals":[],"budget":3000}');
+const $=id=>document.getElementById(id), money=n=>new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(n||0), today=()=>new Date().toISOString().slice(0,10);
+$("date").value=today();$("month").value=today().slice(0,7);
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function monthTx(){let m=$("month").value;return d.transactions.filter(x=>x.date.slice(0,7)===m)}
+function save(){localStorage.setItem(KEY,JSON.stringify(d));render()}
+function sums(){let a=monthTx(),i=a.filter(x=>x.type==="income").reduce((s,x)=>s+x.amount,0),e=a.filter(x=>x.type==="expense").reduce((s,x)=>s+x.amount,0);return{i,e,b:i-e,a}}
+function txRow(x){return `<div class="row"><div><b>${esc(x.desc||x.category)}</b><br><small>${esc(x.category)} · ${esc(x.method)} · ${x.date.split("-").reverse().join("/")}</small></div><div class="actions"><span class="amount ${x.type==="income"?"green":"red"}">${x.type==="income"?"+":"−"} ${money(x.amount)}</span><button class="btn danger" onclick="removeTx('${x.id}')">×</button></div></div>`}
+window.removeTx=id=>{d.transactions=d.transactions.filter(x=>x.id!==id);save()};
+function render(){let s=sums(),rate=s.i?Math.max(0,s.b/s.i*100):0;$("balance").textContent=money(s.b);$("income").textContent=money(s.i);$("expense").textContent=money(s.e);$("saveRate").textContent=rate.toFixed(0)+"%";
+let used=s.e, bp=Math.min(100,used/d.budget*100);$("budgetHome").textContent=money(d.budget);$("budgetFill").style.width=bp+"%";
+let credit=d.transactions.filter(x=>x.type==="expense"&&x.method==="Crédito"&&x.date.slice(0,7)===$("month").value).reduce((a,x)=>a+x.amount,0);$("cardHome").textContent=money(credit);$("cardHint").textContent=d.cards.length?`${d.cards.length} cartão(ões) cadastrado(s)`:"Cadastre seu cartão";
+let list=[...monthTx()].sort((a,b)=>b.date.localeCompare(a.date));$("recent").innerHTML=list.slice(0,6).map(txRow).join("")||'<div class="empty">Nenhum lançamento neste mês.</div>';$("history").innerHTML=list.map(txRow).join("")||'<div class="empty">Nenhum lançamento neste mês.</div>';
+$("analysis").textContent=s.e?`Neste mês você gastou ${money(s.e)} e recebeu ${money(s.i)}. ${s.b>=0?"Seu fluxo está positivo.":"Suas despesas superaram as receitas."} O orçamento definido é ${money(d.budget)}.`:"Cadastre receitas e despesas para eu analisar seu mês.";
+renderCards();renderRecurring();renderGoals();chatInit()}
+function renderCards(){let s=sums();$("cardsList").innerHTML=d.cards.map((c,i)=>{let used=monthTx().filter(x=>x.method==="Crédito"&&x.type==="expense").reduce((a,x)=>a+x.amount,0);let p=Math.min(100,used/c.limit*100);return `<div class="card"><div class="statline"><b>${esc(c.name)}</b><span>${money(used)} / ${money(c.limit)}</span></div><div class="progress"><div class="fill" style="width:${p}%"></div></div><div class="actions" style="margin-top:10px"><span class="tag">Uso ${p.toFixed(0)}%</span><button class="btn danger" onclick="delCard(${i})">Excluir</button></div></div>`}).join("")||'<div class="empty">Nenhum cartão cadastrado.</div>'}
+window.delCard=i=>{d.cards.splice(i,1);save()};
+function renderRecurring(){$("recList").innerHTML=d.recurring.map((r,i)=>`<div class="row"><div><b>${esc(r.name)}</b><br><small>${esc(r.category)} · dia ${r.day}</small></div><div class="actions"><span class="amount red">− ${money(r.value)}</span><button class="btn danger" onclick="delRec(${i})">Excluir</button></div></div>`).join("")||'<div class="empty">Nenhuma conta recorrente.</div>'}
+window.delRec=i=>{d.recurring.splice(i,1);save()};
+function renderGoals(){$("goalList").innerHTML=d.goals.map((g,i)=>{let p=Math.min(100,g.target?g.saved/g.target*100:0);return `<div class="card goal"><div class="goalhead"><b>${esc(g.name)}</b><span class="tag">${p.toFixed(0)}%</span></div><div class="statline"><span>${money(g.saved)}</span><span>${money(g.target)}</span></div><div class="progress"><div class="fill" style="width:${p}%"></div></div><button class="btn danger" onclick="delGoal(${i})">Excluir meta</button></div>`}).join("")||'<div class="empty">Crie sua primeira meta.</div>'}
+window.delGoal=i=>{d.goals.splice(i,1);save()};
+$("addTx").onclick=()=>{let v=parseFloat($("amount").value);if(!v||v<=0)return alert("Informe um valor válido.");d.transactions.push({id:Date.now().toString(),type:$("type").value,amount:v,category:$("category").value,date:$("date").value||today(),desc:$("desc").value.trim()||$("category").value,method:$("method").value});$("amount").value="";$("desc").value="";save();alert("Lançamento adicionado.")};
+$("addCard").onclick=()=>{let n=$("cardName").value.trim(),l=parseFloat($("cardLimit").value);if(!n||!l)return alert("Preencha nome e limite.");d.cards.push({name:n,limit:l});$("cardName").value="";$("cardLimit").value="";save()};
+$("addRec").onclick=()=>{let n=$("recName").value.trim(),v=parseFloat($("recValue").value),day=parseInt($("recDay").value);if(!n||!v)return alert("Preencha nome e valor.");d.recurring.push({name:n,value:v,category:$("recCat").value,day:day||10});$("recName").value="";$("recValue").value="";save()};
+$("addGoal").onclick=()=>{let n=$("goalName").value.trim(),t=parseFloat($("goalTarget").value),s=parseFloat($("goalSaved").value)||0;if(!n||!t)return alert("Preencha a meta e o valor alvo.");d.goals.push({name:n,target:t,saved:s});$("goalName").value="";$("goalTarget").value="";$("goalSaved").value="";save()};
+$("month").onchange=render;
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));$(b.dataset.view).classList.add("active")});
+function answer(q){q=q.toLowerCase();let s=sums();if(q.includes("saldo"))return`Seu saldo em ${$("month").value} é <b>${money(s.b)}</b>.`;if(q.includes("receita")||q.includes("ganhei"))return`As receitas de ${$("month").value} somam <b>${money(s.i)}</b>.`;if(q.includes("gastei")||q.includes("despesa")||q.includes("gasto")){let by={};s.a.filter(x=>x.type==="expense").forEach(x=>by[x.category]=(by[x.category]||0)+x.amount);let top=Object.entries(by).sort((a,b)=>b[1]-a[1])[0];return top?`Você gastou <b>${money(s.e)}</b>. A categoria com maior gasto foi <b>${esc(top[0])}</b>, com <b>${money(top[1])}</b>.`:`Você ainda não registrou despesas neste mês.`}if(q.includes("cartão"))return`Neste mês, seus gastos lançados como crédito somam <b>${money(d.transactions.filter(x=>x.type==="expense"&&x.method==="Crédito"&&x.date.slice(0,7)===$("month").value).reduce((a,x)=>a+x.amount,0))}</b>.`;if(q.includes("meta"))return d.goals.length?`Você tem <b>${d.goals.length}</b> meta(s). Acesse a aba Metas para acompanhar o progresso.`:"Você ainda não criou nenhuma meta.";if(q.includes("econom"))return`Sua taxa de economia neste mês é de <b>${s.i?Math.max(0,s.b/s.i*100).toFixed(0):0}%</b>.`;return"Posso analisar seu saldo, receitas, despesas, cartão, economia e metas. Tente perguntar: “qual minha maior despesa?”`}
+function chatInit(){if(!$("messages").children.length)addMsg("Olá! Sou o FinAI V2. Pergunte sobre seu mês, gastos, cartões ou metas.")}
+function addMsg(t,me=false){$("messages").insertAdjacentHTML("beforeend",`<div class="msg ${me?"me":"bot"}">${t}</div>`);$("messages").scrollTop=99999}
+$("send").onclick=()=>{let q=$("q").value.trim();if(!q)return;addMsg(esc(q),true);$("q").value="";setTimeout(()=>addMsg(answer(q)),120)};$("q").onkeydown=e=>{if(e.key==="Enter")$("send").click()};
+if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js"));
+render();
+</script></body></html>
